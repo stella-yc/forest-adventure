@@ -23,6 +23,12 @@ export default class extends Phaser.State {
     this.load.image('loaderBar', './assets/images/loader-bar.png')
   }
 
+  create () {
+    this.game.scale.pageAlignHorizontally = true
+    this.game.scale.pageAlignVertically = true
+    this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
+    this.game.renderer.renderSession.roundPixels = true // no blurring
+  }
   render () {
     if (this.fontsReady) {
       this.state.start('Splash')
