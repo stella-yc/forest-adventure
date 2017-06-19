@@ -9,7 +9,8 @@ import Tree from '../sprites/Tree'
 export default class extends Phaser.State {
   init () { }
   preload () {
-    this.game.load.tilemap('tileMap-2000-400', 'assets/tileMap-2000-400.json', null, Phaser.Tilemap.TILED_JSON)
+    // this.game.load.tilemap('tileMap-2000-400', 'assets/tileMap-2000-400.json', null, Phaser.Tilemap.TILED_JSON)
+    this.game.load.tilemap('tileMap-2000-400', 'assets/tileMap-debug.json', null, Phaser.Tilemap.TILED_JSON)
     this.game.load.image('sunnyLand', 'assets/images/tileset.png')
   }
 
@@ -92,9 +93,9 @@ export default class extends Phaser.State {
     this.gems = this.game.add.group()
     this.gems.enableBody = true
     var gem = this.gems.create(500, 335, 'gem')
-    gem = this.gems.create(1220, 195, 'gem')
-    gem = this.gems.create(1690, 195, 'gem')
-    gem = this.gems.create(1800, 335, 'gem')
+    gem = this.gems.create(1220, 240, 'gem')
+    gem = this.gems.create(1740, 195, 'gem')
+    gem = this.gems.create(1820, 330, 'gem')
     gem = this.gems.create(2650, 230, 'gem')
     this.gemCounter = 0
 
@@ -127,12 +128,12 @@ export default class extends Phaser.State {
     this.bots.add(bot)
     bot = new Bot({
       game: this.game,
-      x: 1600,
+      x: 1400,
       y: 0,
       key: 'blueBot',
       frame: 0,
-      rightbound: 1700,
-      leftbound: 1620
+      rightbound: 1480,
+      leftbound: 1410
     })
     this.game.physics.arcade.enable(this)
     this.bots.add(bot)
@@ -154,7 +155,7 @@ export default class extends Phaser.State {
       y: 0,
       key: 'blueBot',
       frame: 0,
-      rightbound: 2400,
+      rightbound: 2430,
       leftbound: 2370
     })
     this.game.physics.arcade.enable(this)
@@ -206,6 +207,12 @@ export default class extends Phaser.State {
     this.loseText = this.game.add.text(80, 40, 'You Lose!', { font: "30px Cabin Sketch", fill: "#ffffff", align: "center" })
     this.loseText.fixedToCamera = true
     this.loseText.visible = false
+    this.button = this.game.add.button(150, this.game.world.centerY + 160, 'crate-button', this.startGame, this, 2, 1, 0)
+    this.button.anchor.setTo(0.5)
+    this.buttonText = this.game.add.text(150, this.game.world.centerY + 163, 'Try Again', { font: "12px Cabin Sketch", fill: "#000000", align: "center" })
+    this.buttonText.anchor.setTo(0.5)
+    this.button.visible = false
+    this.buttonText.visible = false
   }
 
   update () {
@@ -238,7 +245,7 @@ export default class extends Phaser.State {
     // Climb Tree
     this.game.physics.arcade.overlap(this.player, this.trunks, this.climb, null, this)
     // Restore gravity on tree
-    this.game.physics.arcade.overlap(this.player, this.topPlatforms, this.topOfTree, null, this)
+    // this.game.physics.arcade.overlap(this.player, this.topPlatforms, this.topOfTree, null, this)
 
 
     // Moving Player
@@ -337,6 +344,8 @@ export default class extends Phaser.State {
       tween.to({ alpha: 1 }, 300)
       tween.onComplete.add(() => {
         this.loseText.visible = true
+        this.button.visible = true
+        this.buttonText.visible = true
       })
       tween.start()
     }
@@ -359,27 +368,21 @@ export default class extends Phaser.State {
     this.player.health = this.player.health - 3
     if (this.player.health < 0) {
       this.player.health = 0
+
       this.game.add.tween(this.black).to( { alpha: 1 }, 2000, "Linear", true);
       let tween = this.game.add.tween(this.black)
-
       tween.to({ alpha: 1 }, 300)
       tween.onComplete.add(() => {
         this.loseText.visible = true
+        this.game.world.bringToTop(this.button)
+        this.game.world.bringToTop(this.buttonText)
+        this.button.visible = true
+        this.buttonText.visible = true
       })
       tween.start()
     }
     this.myHealthBar.setPercent(this.player.health)
     // this.healthNumber.text = `${this.player.health}`
-
-    // if (player.body.velocity.x > 0) {
-    //   player.x = player.x + 50
-    //   player.y = this.game.world.height - 80
-    // }
-
-    // if (player.body.velocity.x < 0) {
-    //   player.x = player.x - 50
-    //   player.y = this.game.world.height - 80
-    // }
 
     player.body.velocity.x = -player.body.velocity.x
   }
@@ -409,8 +412,6 @@ export default class extends Phaser.State {
   }
 
   destroyEnemy (enemy, bullet) {
-    console.log('bullet', bullet)
-    console.log('enemy', enemy)
     enemy.health = enemy.health - 10
     let hurtTween = this.game.add.tween(enemy)
 
@@ -419,7 +420,6 @@ export default class extends Phaser.State {
       enemy.tint = 0xffffff
     })
     hurtTween.start()
-    console.log(enemy.health)
     if (enemy.health <= 0) {
       enemy.kill()
     }
@@ -462,14 +462,13 @@ export default class extends Phaser.State {
 
   climb (player, tree) {
     if (this.cursors.up.isDown) {
-      console.log('this.player.body in climb', this.player.body)
       this.player.climbing = true
       this.player.animations.play('climb', 10, true)
-      this.player.body.gravity.y = 0
+      // this.player.body.gravity.y = 0
+      this.player.body.allowGravity = false
       this.player.body.velocity.y = -40
     } else {
       if (this.player.climbing) {
-
         this.player.animations.stop()
         this.player.frame = 6
         this.player.body.velocity.y = 0
@@ -482,6 +481,7 @@ export default class extends Phaser.State {
         }
         if (this.player.body.blocked.down) {
           this.player.climbing = false
+          this.player.body.allowGravity = true
         }
       }
     }
@@ -490,7 +490,8 @@ export default class extends Phaser.State {
   topOfTree () {
     // console.log('this.player.body in topOfTree', this.player.body)
     this.player.frame = 6
-    this.player.body.gravity.y = 300
+    // this.player.body.gravity.y = 300
+    this.player.body.allowGravity = true
     this.player.climbing = false
     this.player.treeTop = true
 
@@ -500,7 +501,6 @@ export default class extends Phaser.State {
       this.player.scale.setTo(-1, 1)
       this.player.frame = 7
       // this.player.animations.play('climb')
-      console.log('***left is down')
     }
     else if (this.cursors.right.isDown) {
 
@@ -508,7 +508,6 @@ export default class extends Phaser.State {
       this.player.scale.setTo(1, 1)
       this.player.frame = 7
       // this.player.animations.play('climb')
-      console.log('***right is down')
     }
     else {
       // this.player.animations.stop()
@@ -523,6 +522,9 @@ export default class extends Phaser.State {
     var boundsA = spriteA.getBounds()
     var boundsB = spriteB.getBounds()
     return Phaser.Rectangle.intersects(boundsA, boundsB)
+  }
+  startGame () {
+    this.state.start('Game')
   }
 
   render () {
