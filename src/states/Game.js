@@ -60,6 +60,7 @@ export default class extends Phaser.State {
     this.player.animations.add('left', [0, 1, 2, 3, 4, 5], 10, true)
     this.player.animations.add('right', [0, 1, 2, 3, 4, 5], 10, true)
     this.player.animations.add('climb', [6, 7, 8], 10, true)
+    this.player.animations.add('hurt', [9, 10], 10, true)
 
     this.player.health = 100
     this.player.climbing = false
@@ -160,15 +161,15 @@ export default class extends Phaser.State {
     this.bots.add(bot)
 
     // Cat
-    this.cat = this.game.add.sprite(150, 0, 'cat', 0)
-    this.cat.anchor.setTo(0.5)
-    this.game.physics.arcade.enable(this.cat)
-    this.cat.body.bounce.y = 0.2
-    this.cat.body.gravity.y = 300
-    this.cat.body.collideWorldBounds = true
-    this.cat.animations.add('left', [0, 1, 2, 3], 10, true)
-    this.cat.animations.add('right', [0, 1, 2, 3], 10, true)
-    this.cat.health = 100
+    // this.cat = this.game.add.sprite(150, 0, 'cat', 0)
+    // this.cat.anchor.setTo(0.5)
+    // this.game.physics.arcade.enable(this.cat)
+    // this.cat.body.bounce.y = 0.2
+    // this.cat.body.gravity.y = 300
+    // this.cat.body.collideWorldBounds = true
+    // this.cat.animations.add('left', [0, 1, 2, 3], 10, true)
+    // this.cat.animations.add('right', [0, 1, 2, 3], 10, true)
+    // this.cat.health = 100
 
     // Health Bar
     var barConfig = {x: 60, y: 20}
@@ -176,8 +177,8 @@ export default class extends Phaser.State {
     this.myHealthBar.setFixedToCamera(true)
     this.border = this.game.add.sprite(5, 10, 'healthbarBorder')
     this.border.fixedToCamera = true
-    this.healthNumber = this.game.add.text(10, 30, `${this.player.health}`, { font: "16px Arial", fill: "#000000", align: "center" })
-    this.healthNumber.fixedToCamera = true
+    // this.healthNumber = this.game.add.text(10, 30, `${this.player.health}`, { font: "16px Arial", fill: "#000000", align: "center" })
+    // this.healthNumber.fixedToCamera = true
 
     // Bullet
     this.bullets = this.game.add.group()
@@ -195,14 +196,14 @@ export default class extends Phaser.State {
     this.letterC = this.game.input.keyboard.addKey(Phaser.Keyboard.C)
 
     // Win Text
-    this.winText = this.game.add.text(80, 40, 'You Win!', { font: "30px Arial", fill: "#000000", align: "center" })
+    this.winText = this.game.add.text(80, 40, 'You Win!', { font: "30px Cabin Sketch", fill: "#000000", align: "center" })
     this.winText.fixedToCamera = true
     this.winText.visible = false
 
     // Lose Text
     this.black = this.game.add.sprite(0, 0, 'black')
     this.black.alpha = 0
-    this.loseText = this.game.add.text(80, 40, 'You Lose!', { font: "30px Arial", fill: "#ffffff", align: "center" })
+    this.loseText = this.game.add.text(80, 40, 'You Lose!', { font: "30px Cabin Sketch", fill: "#ffffff", align: "center" })
     this.loseText.fixedToCamera = true
     this.loseText.visible = false
   }
@@ -220,6 +221,7 @@ export default class extends Phaser.State {
     this.game.world.bringToTop(this.trunks)
     this.game.world.bringToTop(this.hiddenPlatforms)
     this.game.world.bringToTop(this.topPlatforms)
+    this.game.world.bringToTop(this.myHealthBar)
     this.game.world.bringToTop(this.player)
 
     // Touch enemy
@@ -229,7 +231,7 @@ export default class extends Phaser.State {
     // Destroy Enemy
     this.game.physics.arcade.overlap(this.bots, this.bullets, this.destroyEnemy, null, this)
     // Spikes
-    this.game.physics.arcade.overlap(this.player, this.spikes, this.takeDamage, null, this)
+    this.game.physics.arcade.overlap(this.player, this.spikes, this.die, null, this)
     // Find Gem
     this.game.physics.arcade.overlap(this.player, this.gems, this.updateGemScore, null, this)
 
@@ -260,6 +262,9 @@ export default class extends Phaser.State {
     if (this.cursors.up.isDown && !this.player.climbing && this.player.body.blocked.down) {
       this.player.body.velocity.y = -120
     }
+
+    // Restore gravity on tree
+    this.game.physics.arcade.overlap(this.player, this.topPlatforms, this.topOfTree, null, this)
 
     // shoot
     if (this.spaceKey.isDown) {
@@ -295,7 +300,7 @@ export default class extends Phaser.State {
       this.player.health = 100
     }
     this.myHealthBar.setPercent(this.player.health)
-    this.healthNumber.text = `${this.player.health}`
+    // this.healthNumber.text = `${this.player.health}`
   }
 
   updateGemScore (player, gem) {
@@ -313,15 +318,15 @@ export default class extends Phaser.State {
     }
   }
 
-  takeDamage (player, enemy) {
+  die (player, spike) {
+    player.frame = 9
+    this.player.animations.play('hurt', 10, true)
     this.player.tint = 0xff00ff
     let tween = this.game.add.tween(player)
-
     tween.to({ tint: 0xff0000 }, 300)
     tween.onComplete.add(() => {
       player.tint = 0xffffff
     })
-    tween.start()
 
     this.player.health = this.player.health - 3
     if (this.player.health < 0) {
@@ -336,17 +341,45 @@ export default class extends Phaser.State {
       tween.start()
     }
     this.myHealthBar.setPercent(this.player.health)
-    this.healthNumber.text = `${this.player.health}`
+  }
 
-    if (player.body.velocity.x > 0) {
-      player.x = player.x + 50
-      player.y = this.game.world.height - 80
-    }
+  takeDamage (player, enemy) {
+    this.player.tint = 0xff00ff
+    let tween = this.game.add.tween(player)
 
-    if (player.body.velocity.x < 0) {
-      player.x = player.x - 50
-      player.y = this.game.world.height - 80
+    tween.to({ tint: 0xff0000 }, 300)
+    tween.onComplete.add(() => {
+      player.tint = 0xffffff
+    })
+    let motionTween = this.game.add.tween(player)
+    motionTween.to({ y: this.player.y - 30, x: this.player.x - 30}, 150)
+    tween.start()
+    motionTween.start()
+
+    this.player.health = this.player.health - 3
+    if (this.player.health < 0) {
+      this.player.health = 0
+      this.game.add.tween(this.black).to( { alpha: 1 }, 2000, "Linear", true);
+      let tween = this.game.add.tween(this.black)
+
+      tween.to({ alpha: 1 }, 300)
+      tween.onComplete.add(() => {
+        this.loseText.visible = true
+      })
+      tween.start()
     }
+    this.myHealthBar.setPercent(this.player.health)
+    // this.healthNumber.text = `${this.player.health}`
+
+    // if (player.body.velocity.x > 0) {
+    //   player.x = player.x + 50
+    //   player.y = this.game.world.height - 80
+    // }
+
+    // if (player.body.velocity.x < 0) {
+    //   player.x = player.x - 50
+    //   player.y = this.game.world.height - 80
+    // }
 
     player.body.velocity.x = -player.body.velocity.x
   }
@@ -375,8 +408,21 @@ export default class extends Phaser.State {
     }
   }
 
-  destroyEnemy (bullet, enemy) {
-    enemy.kill()
+  destroyEnemy (enemy, bullet) {
+    console.log('bullet', bullet)
+    console.log('enemy', enemy)
+    enemy.health = enemy.health - 10
+    let hurtTween = this.game.add.tween(enemy)
+
+    hurtTween.to({ tint: 0xff0000 }, 300)
+    hurtTween.onComplete.add(() => {
+      enemy.tint = 0xffffff
+    })
+    hurtTween.start()
+    console.log(enemy.health)
+    if (enemy.health <= 0) {
+      enemy.kill()
+    }
     bullet.kill()
   }
 
@@ -449,20 +495,24 @@ export default class extends Phaser.State {
     this.player.treeTop = true
 
     if (this.cursors.left.isDown) {
-      console.log('***left is down')
+
       this.player.body.velocity.x = -200
       this.player.scale.setTo(-1, 1)
-      this.player.animations.play('climb')
+      this.player.frame = 7
+      // this.player.animations.play('climb')
+      console.log('***left is down')
     }
     else if (this.cursors.right.isDown) {
-      console.log('***right is down')
+
       this.player.body.velocity.x = 200
       this.player.scale.setTo(1, 1)
-      this.player.animations.play('climb')
+      this.player.frame = 7
+      // this.player.animations.play('climb')
+      console.log('***right is down')
     }
     else {
-      this.player.animations.stop()
-      this.player.frame = 6
+      // this.player.animations.stop()
+      // this.player.frame = 6
     }
     if (this.cursors.up.isDown && this.player.body.touching.down) {
       this.player.body.velocity.y = -80

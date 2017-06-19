@@ -15,6 +15,7 @@ export default class Bot extends Phaser.Sprite {
     this.health = 100
     this.leftbound = leftbound
     this.rightbound = rightbound
+    this.health = 30
   }
 
   update () {
