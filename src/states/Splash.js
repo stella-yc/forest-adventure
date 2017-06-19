@@ -22,8 +22,12 @@ export default class extends Phaser.State {
     this.load.image('groundTile', 'assets/images/groundTile.png')
     this.load.image('healthbarBorder', 'assets/images/healthbar.png')
     this.load.image('tree', 'assets/images/tree.png')
+    this.load.image('hiddenPlatform', 'assets/images/hiddenPlatform.png')
+    this.load.image('treeTop', 'assets/images/treeTop.png')
+    this.load.image('treeTrunk', 'assets/images/treeTrunk.png')
+    this.load.image('black', 'assets/images/black.png')
 
-    this.load.spritesheet('player', 'assets/images/payer-run.png', 32, 32)
+    this.load.spritesheet('player', 'assets/images/player-full.png', 32, 32)
     this.load.spritesheet('bot', 'assets/images/Old enemies 2 (1).png', 16, 16)
     this.load.spritesheet('blueBot', 'assets/images/blueBot.png', 16, 16)
     this.load.spritesheet('cat', 'assets/images/cat_fighter_sprite1.png', 50, 50)

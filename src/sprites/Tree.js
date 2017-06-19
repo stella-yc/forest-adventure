@@ -9,6 +9,7 @@ export default class Tree extends Phaser.Sprite {
     this.body.gravity.y = 300
     this.body.collideWorldBounds = true
     this.scale.setTo(0.1, 0.1)
+    this.body.checkCollision.up = true
     game.add.tween(this.scale).to({x: 1, y: 1}, 50, Phaser.Easing.Back.Out, true, 1000)
   }
 
