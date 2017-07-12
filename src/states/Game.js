@@ -390,10 +390,11 @@ export default class extends Phaser.State {
   shoot () {
     if (this.game.time.now > this.bulletTime) {
       let bullet = this.bullets.getFirstExists(false)
+      var start = this.player.centerX
       if (!bullet) {
         bullet = new Bullet({
           game: this.game,
-          x: this.player.centerX,
+          x: start,
           y: this.player.centerY,
           health: 3,
           asset: 'bullet'
@@ -406,6 +407,9 @@ export default class extends Phaser.State {
         bullet.body.velocity.x = -200
       } else {
         bullet.body.velocity.x = 200
+      }
+      if (Math.abs(bullet.x - start) > 10) {
+        bullet.kill()
       }
       this.bulletTime = this.game.time.now + 250
     }

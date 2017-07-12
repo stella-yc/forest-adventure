@@ -1,8 +1,8 @@
 {
-  "name": "PhaserES6Webpack",
+  "name": "Forest Adventure",
   "version": "1.0.0",
-  "description": "",
-  "author": "leandro cabrera <leandcabrera@gmail.com>",
+  "description": "A classic 2D platformer",
+  "author": "Stella Chung",
   "main": "index.js",
   "scripts": {
     "dev": "webpack",
