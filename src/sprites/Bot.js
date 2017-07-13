@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
-export default class Bot extends Phaser.Sprite {
 
+export default class Bot extends Phaser.Sprite {
   constructor ({ game, x, y, key, frame, leftbound, rightbound }) {
     super(game, x, y, key, frame)
 

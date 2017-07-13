@@ -1,4 +1,3 @@
-/* globals __DEV__ */
 import Phaser from 'phaser'
 import Player from '../sprites/Player'
 import Bullet from '../sprites/Bullet'
@@ -9,7 +8,6 @@ import Tree from '../sprites/Tree'
 export default class extends Phaser.State {
   init () { }
   preload () {
-    // this.game.load.tilemap('tileMap-2000-400', 'assets/tileMap-2000-400.json', null, Phaser.Tilemap.TILED_JSON)
     this.game.load.tilemap('tileMap-2000-400', 'assets/tileMap-debug.json', null, Phaser.Tilemap.TILED_JSON)
     this.game.load.image('sunnyLand', 'assets/images/tileset.png')
   }
@@ -43,38 +41,25 @@ export default class extends Phaser.State {
     // Spikes
     this.spikes = this.game.add.group()
     this.spikes.enableBody = true
-    var spike = this.spikes.create(952, 342, 'spikes')
-    spike = this.spikes.create(952 + 17, 342, 'spikes')
-    spike = this.spikes.create(952 + 17 + 17, 342, 'spikes')
-    spike = this.spikes.create(1112, 342, 'spikes')
-    spike = this.spikes.create(1112 + 17, 342, 'spikes')
-    spike = this.spikes.create(1112 + 17 + 17, 342, 'spikes')
+    this.spikeWidth = 17
+    const spikeMaker = (xCoord, yCoord, quantity) => {
+      for (let i = 0; i < quantity; i++) {
+        this.spikes.create(xCoord, yCoord, 'spikes')
+        xCoord += this.spikeWidth
+      }
+    }
+    spikeMaker(952, 342, 3)
+    spikeMaker(1112, 342, 3)
 
-    // Player
-    this.player = this.game.add.sprite(32, this.game.world.height - 150, 'player')
-    this.player.anchor.setTo(0.5)
-    this.game.physics.arcade.enable(this.player)
-    // this.player.body.bounce.y = 0.3
-    // this.player.body.bounce.x = 0.9
-    this.player.body.gravity.y = 300
-    this.player.body.collideWorldBounds = true
-    this.player.animations.add('left', [0, 1, 2, 3, 4, 5], 10, true)
-    this.player.animations.add('right', [0, 1, 2, 3, 4, 5], 10, true)
-    this.player.animations.add('climb', [6, 7, 8], 10, true)
-    this.player.animations.add('hurt', [9, 10], 10, true)
-
-    this.player.health = 100
-    this.player.climbing = false
-    this.player.treeTop = false
-
-    // this.player = new Player({
-    //   game: this,
-    //   x: 32,
-    //   y: this.game.world.height - 150,
-    //   asset: 'player'
-    // })
-
-    // this.game.add.existing(this.player)
+    // Player (Fox Sprite)
+    this.player = new Player({
+      game: this.game,
+      x: 32,
+      y: this.game.world.height - 150,
+      key: 'player',
+      frame: 0
+    })
+    this.game.add.existing(this.player)
 
     // Camera
     this.game.camera.follow(this.player)
@@ -160,17 +145,6 @@ export default class extends Phaser.State {
     })
     this.game.physics.arcade.enable(this)
     this.bots.add(bot)
-
-    // Cat
-    // this.cat = this.game.add.sprite(150, 0, 'cat', 0)
-    // this.cat.anchor.setTo(0.5)
-    // this.game.physics.arcade.enable(this.cat)
-    // this.cat.body.bounce.y = 0.2
-    // this.cat.body.gravity.y = 300
-    // this.cat.body.collideWorldBounds = true
-    // this.cat.animations.add('left', [0, 1, 2, 3], 10, true)
-    // this.cat.animations.add('right', [0, 1, 2, 3], 10, true)
-    // this.cat.health = 100
 
     // Health Bar
     var barConfig = {x: 60, y: 20}
@@ -298,7 +272,7 @@ export default class extends Phaser.State {
     // end of update
   }
 
-/// HELPER FUNCTIONS
+/// *********** HELPER FUNCTIONS ************** ///
 
   collectFruit (player, cherry) {
     cherry.kill()
