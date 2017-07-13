@@ -202,9 +202,9 @@ export default class extends Phaser.State {
     // Find Gem
     this.game.physics.arcade.overlap(this.player, this.gems, this.updateGemScore, null, this)
     // Climb Tree
-    this.game.physics.arcade.overlap(this.player, this.trunks, this.climb, null, this)
+    this.game.physics.arcade.overlap(this.player, this.trunks, this.player.climb, null, this)
     // Restore gravity on tree top
-    this.game.physics.arcade.overlap(this.player, this.topPlatforms, this.topOfTree, null, this)
+    this.game.physics.arcade.overlap(this.player, this.topPlatforms, this.player.topOfTree, null, this)
 
     // plant tree
     let flipFlop
@@ -300,69 +300,12 @@ export default class extends Phaser.State {
     }
   }
 
-  climb (player, tree) {
-    if (this.cursors.up.isDown) {
-      this.player.climbing = true
-      this.player.animations.play('climb', 10, true)
-      // this.player.body.gravity.y = 0
-      this.player.body.allowGravity = false
-      this.player.body.velocity.y = -40
-    } else {
-      if (this.player.climbing) {
-        this.player.animations.stop()
-        this.player.frame = 6
-        this.player.body.velocity.y = 0
-
-        if (this.cursors.left.isDown) {
-          this.player.body.velocity.y = 0
-        }
-        if (this.cursors.down.isDown) {
-          this.player.body.velocity.y = 40
-        }
-        if (this.player.body.blocked.down) {
-          this.player.climbing = false
-          this.player.body.allowGravity = true
-        }
-      }
-    }
-  }
-
-  topOfTree () {
-    // console.log('this.player.body in topOfTree', this.player.body)
-    this.player.frame = 6
-    // this.player.body.gravity.y = 300
-    this.player.body.allowGravity = true
-    this.player.climbing = false
-    this.player.treeTop = true
-
-    if (this.cursors.left.isDown) {
-
-      this.player.body.velocity.x = -200
-      this.player.scale.setTo(-1, 1)
-      this.player.frame = 7
-      // this.player.animations.play('climb')
-    }
-    else if (this.cursors.right.isDown) {
-
-      this.player.body.velocity.x = 200
-      this.player.scale.setTo(1, 1)
-      this.player.frame = 7
-      // this.player.animations.play('climb')
-    }
-    else {
-      this.player.animations.stop()
-      this.player.frame = 6
-    }
-    if (this.cursors.up.isDown && this.player.body.touching.down) {
-      this.player.body.velocity.y = -80
-    }
-  }
-
   checkOverlap (spriteA, spriteB) {
     var boundsA = spriteA.getBounds()
     var boundsB = spriteB.getBounds()
     return Phaser.Rectangle.intersects(boundsA, boundsB)
   }
+
   startGame () {
     this.state.start('Game')
   }

@@ -19,6 +19,7 @@ export default class Player extends Phaser.Sprite {
     this.health = 100
     this.climbing = false
     this.treeTop = false
+    this.treeJump = false
     // importing controls from game state
     this.controls = controls
     this.spacebar = spacebar
@@ -32,17 +33,17 @@ export default class Player extends Phaser.Sprite {
   update () {
     // Moving Player
     this.body.velocity.x = 0
-    if (this.controls.left.isDown && !this.climbing) {
+    if (this.controls.left.isDown && !this.climbing && !this.treeTop) {
       this.body.velocity.x = -200
       this.scale.setTo(-1, 1)
       this.animations.play('left')
     }
-    else if (this.controls.right.isDown && !this.climbing) {
+    else if (this.controls.right.isDown && !this.climbing && !this.treeTop) {
       this.body.velocity.x = 200
       this.scale.setTo(1, 1)
       this.animations.play('right')
     }
-    else if (this.body.blocked.down && !this.treetop) {
+    else if (this.body.blocked.down && !this.treetop && !this.treeTop) {
       this.animations.stop()
       this.frame = 2
     }
@@ -55,6 +56,64 @@ export default class Player extends Phaser.Sprite {
     if (this.spacebar.isDown) {
       this.shoot()
     }
+
+    // Player is climbing
+    if (this.climbing) {
+      if (this.controls.up.isDown) {
+        this.climbing = true
+        this.animations.play('climb', 10, true)
+        this.body.allowGravity = false
+        this.body.velocity.y = -40
+      } else {
+        if (this.controls.down.isDown) {
+          this.body.velocity.y = 40
+          this.animations.play('climb', 10, true)
+        } else {
+          this.animations.stop()
+          this.frame = 6
+          this.body.velocity.y = 0
+        }
+      }
+      if (this.body.blocked.down) {
+        this.climbing = false
+        this.body.allowGravity = true
+      }
+    }
+
+    // Player in tree top
+    if (this.treeTop) {
+      if (this.controls.left.isDown) {
+        this.body.velocity.x = -200
+        this.scale.setTo(-1, 1)
+        this.frame = 7
+      }
+      else if (this.controls.right.isDown) {
+        this.body.velocity.x = 200
+        this.scale.setTo(1, 1)
+        this.frame = 7
+      }
+      else {
+        this.animations.stop()
+        this.frame = 6
+      }
+      if (this.body.touching.down) {
+        this.treeJump = true
+      }
+      if (this.controls.up.isDown && this.body.touching.down) {
+        this.body.velocity.y = -80
+        this.frame = 1
+      }
+      if (!this.body.touching.down && this.treeJump) {
+        this.frame = 1
+      }
+    }
+    if (this.body.blocked.down) {
+      this.climbing = false
+      this.treeTop = false
+      this.body.allowGravity = true
+      this.treeJump = false
+    }
+
   } // end of update
 
   shoot () {
@@ -147,5 +206,19 @@ export default class Player extends Phaser.Sprite {
     this.myHealthBar.setPercent(this.player.health)
   }
 
+  climb (player, tree) {
+    if (this.cursors.up.isDown) {
+      player.climbing = true
+      player.animations.play('climb', 10, true)
+      player.body.allowGravity = false
+      player.body.velocity.y = -40
+    }
+  }
 
+  topOfTree (player, tree) {
+    player.frame = 6
+    player.body.allowGravity = true
+    player.climbing = false
+    player.treeTop = true
+  }
 }
