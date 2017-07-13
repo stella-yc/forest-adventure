@@ -113,7 +113,6 @@ export default class Player extends Phaser.Sprite {
       this.body.allowGravity = true
       this.treeJump = false
     }
-
   } // end of update
 
   shoot () {
