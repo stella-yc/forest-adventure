@@ -1,4 +1,3 @@
-/* globals __DEV__ */
 import Phaser from 'phaser'
 import Player from '../sprites/Player'
 import Bullet from '../sprites/Bullet'
@@ -9,7 +8,7 @@ import Tree from '../sprites/Tree'
 export default class extends Phaser.State {
   init () { }
   preload () {
-    this.game.load.tilemap('tileMap-2000-400', 'assets/tileMap-2000-400.json', null, Phaser.Tilemap.TILED_JSON)
+    this.game.load.tilemap('tileMap-2000-400', 'assets/tileMap-debug.json', null, Phaser.Tilemap.TILED_JSON)
     this.game.load.image('sunnyLand', 'assets/images/tileset.png')
   }
 
@@ -42,37 +41,33 @@ export default class extends Phaser.State {
     // Spikes
     this.spikes = this.game.add.group()
     this.spikes.enableBody = true
-    var spike = this.spikes.create(952, 342, 'spikes')
-    spike = this.spikes.create(952 + 17, 342, 'spikes')
-    spike = this.spikes.create(952 + 17 + 17, 342, 'spikes')
-    spike = this.spikes.create(1112, 342, 'spikes')
-    spike = this.spikes.create(1112 + 17, 342, 'spikes')
-    spike = this.spikes.create(1112 + 17 + 17, 342, 'spikes')
+    this.spikeWidth = 17
+    const spikeMaker = (xCoord, yCoord, quantity) => {
+      for (let i = 0; i < quantity; i++) {
+        this.spikes.create(xCoord, yCoord, 'spikes')
+        xCoord += this.spikeWidth
+      }
+    }
+    spikeMaker(952, 342, 3)
+    spikeMaker(1112, 342, 3)
 
-    // Player
-    this.player = this.game.add.sprite(32, this.game.world.height - 150, 'player')
-    this.player.anchor.setTo(0.5)
-    this.game.physics.arcade.enable(this.player)
-    // this.player.body.bounce.y = 0.3
-    // this.player.body.bounce.x = 0.9
-    this.player.body.gravity.y = 300
-    this.player.body.collideWorldBounds = true
-    this.player.animations.add('left', [0, 1, 2, 3, 4, 5], 10, true)
-    this.player.animations.add('right', [0, 1, 2, 3, 4, 5], 10, true)
-    this.player.animations.add('climb', [6, 7, 8], 10, true)
+    // Controls
+    this.cursors = this.game.input.keyboard.createCursorKeys()
+    this.spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
+    this.letterC = this.game.input.keyboard.addKey(Phaser.Keyboard.C)
 
-    this.player.health = 100
-    this.player.climbing = false
-    this.player.treeTop = false
-
-    // this.player = new Player({
-    //   game: this,
-    //   x: 32,
-    //   y: this.game.world.height - 150,
-    //   asset: 'player'
-    // })
-
-    // this.game.add.existing(this.player)
+    // Player (Fox Sprite)
+    this.player = new Player({
+      game: this.game,
+      x: 32,
+      y: this.game.world.height - 150,
+      key: 'player',
+      frame: 0,
+      controls: this.cursors,
+      spacebar: this.spaceKey,
+      plantButton: this.letterC
+    })
+    this.game.add.existing(this.player)
 
     // Camera
     this.game.camera.follow(this.player)
@@ -80,9 +75,9 @@ export default class extends Phaser.State {
     // Cherries
     this.cherries = this.game.add.group()
     this.cherries.enableBody = true
-    var locations = [1050, 1350]
-    for (var i = 0; i < locations.length; i++) {
-      var cherry = this.cherries.create(locations[i], 0, 'cherry')
+    const locations = [1050, 1350]
+    for (let i = 0; i < locations.length; i++) {
+      let cherry = this.cherries.create(locations[i], 0, 'cherry')
       cherry.body.gravity.y = 300
       cherry.body.bounce.y = 0.2
     }
@@ -90,17 +85,20 @@ export default class extends Phaser.State {
     // Gems
     this.gems = this.game.add.group()
     this.gems.enableBody = true
-    var gem = this.gems.create(500, 335, 'gem')
-    gem = this.gems.create(1220, 195, 'gem')
-    gem = this.gems.create(1690, 195, 'gem')
-    gem = this.gems.create(1800, 335, 'gem')
-    gem = this.gems.create(2650, 230, 'gem')
+    const gemLocations = [
+      {x: 500, y: 335},
+      {x: 1220, y: 240},
+      {x: 1740, y: 195},
+      {x: 1820, y: 330},
+      {x: 2650, y: 230}
+    ]
+    gemLocations.forEach(gem => this.gems.create(gem.x, gem.y, 'gem'))
     this.gemCounter = 0
 
     // Score Gems
     this.scoreGems = []
-    for (var k = 1; k < 6; k++) {
-      var scoreGem = this.gems.create(140 + (22 * k), 10, 'gem')
+    for (let k = 1; k < 6; k++) {
+      let scoreGem = this.gems.create(140 + (22 * k), 10, 'gem')
       scoreGem.scale.setTo(1.2, 1.2)
       scoreGem.tint = 0x000000
       scoreGem.found = false
@@ -108,7 +106,6 @@ export default class extends Phaser.State {
       this.scoreGems.push(scoreGem)
     }
     this.scoreGems.fixedToCamera = true
-
 
     // Enemy
     this.bots = this.game.add.group()
@@ -126,49 +123,26 @@ export default class extends Phaser.State {
     this.bots.add(bot)
     bot = new Bot({
       game: this.game,
-      x: 1600,
+      x: 1400,
       y: 0,
       key: 'blueBot',
       frame: 0,
-      rightbound: 1700,
-      leftbound: 1620
+      rightbound: 1480,
+      leftbound: 1410
     })
     this.game.physics.arcade.enable(this)
     this.bots.add(bot)
-    // bot = new Bot({
-    //   game: this.game,
-    //   x: 1640,
-    //   y: 0,
-    //   key: 'blueBot',
-    //   frame: 0,
-    //   rightbound: 1800,
-    //   leftbound: 1650
-    // })
-    // this.game.physics.arcade.enable(this)
-    // this.bots.add(bot)
-
     bot = new Bot({
       game: this.game,
       x: 2360,
       y: 0,
       key: 'blueBot',
       frame: 0,
-      rightbound: 2400,
+      rightbound: 2430,
       leftbound: 2370
     })
     this.game.physics.arcade.enable(this)
     this.bots.add(bot)
-
-    // Cat
-    this.cat = this.game.add.sprite(150, 0, 'cat', 0)
-    this.cat.anchor.setTo(0.5)
-    this.game.physics.arcade.enable(this.cat)
-    this.cat.body.bounce.y = 0.2
-    this.cat.body.gravity.y = 300
-    this.cat.body.collideWorldBounds = true
-    this.cat.animations.add('left', [0, 1, 2, 3], 10, true)
-    this.cat.animations.add('right', [0, 1, 2, 3], 10, true)
-    this.cat.health = 100
 
     // Health Bar
     var barConfig = {x: 60, y: 20}
@@ -176,35 +150,29 @@ export default class extends Phaser.State {
     this.myHealthBar.setFixedToCamera(true)
     this.border = this.game.add.sprite(5, 10, 'healthbarBorder')
     this.border.fixedToCamera = true
-    this.healthNumber = this.game.add.text(10, 30, `${this.player.health}`, { font: "16px Arial", fill: "#000000", align: "center" })
-    this.healthNumber.fixedToCamera = true
-
-    // Bullet
-    this.bullets = this.game.add.group()
-    this.bullets.enableBody = true
-    this.bulletTime = 0
 
     // Plant Tree
     this.trees = this.game.add.group()
     this.trees.enableBody = true
     this.plantTime = 0
 
-    // Controls
-    this.cursors = this.game.input.keyboard.createCursorKeys()
-    this.spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
-    this.letterC = this.game.input.keyboard.addKey(Phaser.Keyboard.C)
-
     // Win Text
-    this.winText = this.game.add.text(80, 40, 'You Win!', { font: "30px Arial", fill: "#000000", align: "center" })
+    this.winText = this.game.add.text(80, 40, 'You Win!', { font: "30px Cabin Sketch", fill: "#000000", align: "center" })
     this.winText.fixedToCamera = true
     this.winText.visible = false
 
     // Lose Text
     this.black = this.game.add.sprite(0, 0, 'black')
     this.black.alpha = 0
-    this.loseText = this.game.add.text(80, 40, 'You Lose!', { font: "30px Arial", fill: "#ffffff", align: "center" })
+    this.loseText = this.game.add.text(80, 40, 'You Lose!', { font: "30px Cabin Sketch", fill: "#ffffff", align: "center" })
     this.loseText.fixedToCamera = true
     this.loseText.visible = false
+    this.button = this.game.add.button(150, this.game.world.centerY + 160, 'crate-button', this.startGame, this, 2, 1, 0)
+    this.button.anchor.setTo(0.5)
+    this.buttonText = this.game.add.text(150, this.game.world.centerY + 163, 'Try Again', { font: "12px Cabin Sketch", fill: "#000000", align: "center" })
+    this.buttonText.anchor.setTo(0.5)
+    this.button.visible = false
+    this.buttonText.visible = false
   }
 
   update () {
@@ -220,54 +188,26 @@ export default class extends Phaser.State {
     this.game.world.bringToTop(this.trunks)
     this.game.world.bringToTop(this.hiddenPlatforms)
     this.game.world.bringToTop(this.topPlatforms)
+    this.game.world.bringToTop(this.myHealthBar)
     this.game.world.bringToTop(this.player)
 
     // Touch enemy
-    this.game.physics.arcade.collide(this.player, this.bots, this.takeDamage, null, this)
+    this.game.physics.arcade.collide(this.player, this.bots, this.player.takeDamage, null, this)
     // Eat Cherries
     this.game.physics.arcade.overlap(this.player, this.cherries, this.collectFruit, null, this)
     // Destroy Enemy
-    this.game.physics.arcade.overlap(this.bots, this.bullets, this.destroyEnemy, null, this)
+    this.game.physics.arcade.overlap(this.bots, this.player.bullets, this.destroyEnemy, null, this)
     // Spikes
-    this.game.physics.arcade.overlap(this.player, this.spikes, this.takeDamage, null, this)
+    this.game.physics.arcade.overlap(this.player, this.spikes, this.player.die, null, this)
     // Find Gem
     this.game.physics.arcade.overlap(this.player, this.gems, this.updateGemScore, null, this)
-
     // Climb Tree
-    this.game.physics.arcade.overlap(this.player, this.trunks, this.climb, null, this)
-    // Restore gravity on tree
-    this.game.physics.arcade.overlap(this.player, this.topPlatforms, this.topOfTree, null, this)
-
-
-    // Moving Player
-    this.player.body.velocity.x = 0
-
-    if (this.cursors.left.isDown && !this.player.climbing) {
-      this.player.body.velocity.x = -200
-      this.player.scale.setTo(-1, 1)
-      this.player.animations.play('left')
-    }
-    else if (this.cursors.right.isDown && !this.player.climbing) {
-      this.player.body.velocity.x = 200
-      this.player.scale.setTo(1, 1)
-      this.player.animations.play('right')
-    }
-    else if (this.player.body.blocked.down || !this.player.climbing) {
-      this.player.animations.stop()
-      this.player.frame = 2
-    }
-
-    if (this.cursors.up.isDown && !this.player.climbing && this.player.body.blocked.down) {
-      this.player.body.velocity.y = -120
-    }
-
-    // shoot
-    if (this.spaceKey.isDown) {
-      this.shoot()
-    }
+    this.game.physics.arcade.overlap(this.player, this.trunks, this.player.climb, null, this)
+    // Restore gravity on tree top
+    this.game.physics.arcade.overlap(this.player, this.topPlatforms, this.player.topOfTree, null, this)
 
     // plant tree
-    var flipFlop
+    let flipFlop
     if (this.letterC.isDown) {
       if (!flipFlop) {
         this.plantTree()
@@ -282,11 +222,9 @@ export default class extends Phaser.State {
     // if (this.health === 0) {
     //   this.state.start('Over')
     // }
+  } // end of update
 
-    // end of update
-  }
-
-/// HELPER FUNCTIONS
+/// *********** HELPER FUNCTIONS ************** ///
 
   collectFruit (player, cherry) {
     cherry.kill()
@@ -295,7 +233,7 @@ export default class extends Phaser.State {
       this.player.health = 100
     }
     this.myHealthBar.setPercent(this.player.health)
-    this.healthNumber.text = `${this.player.health}`
+    // this.healthNumber.text = `${this.player.health}`
   }
 
   updateGemScore (player, gem) {
@@ -313,70 +251,18 @@ export default class extends Phaser.State {
     }
   }
 
-  takeDamage (player, enemy) {
-    this.player.tint = 0xff00ff
-    let tween = this.game.add.tween(player)
+  destroyEnemy (enemy, bullet) {
+    enemy.health = enemy.health - 10
+    let hurtTween = this.game.add.tween(enemy)
 
-    tween.to({ tint: 0xff0000 }, 300)
-    tween.onComplete.add(() => {
-      player.tint = 0xffffff
+    hurtTween.to({ tint: 0xff0000 }, 300)
+    hurtTween.onComplete.add(() => {
+      enemy.tint = 0xffffff
     })
-    tween.start()
-
-    this.player.health = this.player.health - 3
-    if (this.player.health < 0) {
-      this.player.health = 0
-      this.game.add.tween(this.black).to( { alpha: 1 }, 2000, "Linear", true);
-      let tween = this.game.add.tween(this.black)
-
-      tween.to({ alpha: 1 }, 300)
-      tween.onComplete.add(() => {
-        this.loseText.visible = true
-      })
-      tween.start()
+    hurtTween.start()
+    if (enemy.health <= 0) {
+      enemy.kill()
     }
-    this.myHealthBar.setPercent(this.player.health)
-    this.healthNumber.text = `${this.player.health}`
-
-    if (player.body.velocity.x > 0) {
-      player.x = player.x + 50
-      player.y = this.game.world.height - 80
-    }
-
-    if (player.body.velocity.x < 0) {
-      player.x = player.x - 50
-      player.y = this.game.world.height - 80
-    }
-
-    player.body.velocity.x = -player.body.velocity.x
-  }
-
-  shoot () {
-    if (this.game.time.now > this.bulletTime) {
-      let bullet = this.bullets.getFirstExists(false)
-      if (!bullet) {
-        bullet = new Bullet({
-          game: this.game,
-          x: this.player.centerX,
-          y: this.player.centerY,
-          health: 3,
-          asset: 'bullet'
-        })
-        this.bullets.add(bullet)
-      } else {
-        bullet.reset(this.player.centerX, this.player.centerY, 3)
-      }
-      if (this.player.scale.x < 0) {
-        bullet.body.velocity.x = -200
-      } else {
-        bullet.body.velocity.x = 200
-      }
-      this.bulletTime = this.game.time.now + 250
-    }
-  }
-
-  destroyEnemy (bullet, enemy) {
-    enemy.kill()
     bullet.kill()
   }
 
@@ -414,65 +300,14 @@ export default class extends Phaser.State {
     }
   }
 
-  climb (player, tree) {
-    if (this.cursors.up.isDown) {
-      console.log('this.player.body in climb', this.player.body)
-      this.player.climbing = true
-      this.player.animations.play('climb', 10, true)
-      this.player.body.gravity.y = 0
-      this.player.body.velocity.y = -40
-    } else {
-      if (this.player.climbing) {
-
-        this.player.animations.stop()
-        this.player.frame = 6
-        this.player.body.velocity.y = 0
-
-        if (this.cursors.left.isDown) {
-          this.player.body.velocity.y = 0
-        }
-        if (this.cursors.down.isDown) {
-          this.player.body.velocity.y = 40
-        }
-        if (this.player.body.blocked.down) {
-          this.player.climbing = false
-        }
-      }
-    }
-  }
-
-  topOfTree () {
-    // console.log('this.player.body in topOfTree', this.player.body)
-    this.player.frame = 6
-    this.player.body.gravity.y = 300
-    this.player.climbing = false
-    this.player.treeTop = true
-
-    if (this.cursors.left.isDown) {
-      console.log('***left is down')
-      this.player.body.velocity.x = -200
-      this.player.scale.setTo(-1, 1)
-      this.player.animations.play('climb')
-    }
-    else if (this.cursors.right.isDown) {
-      console.log('***right is down')
-      this.player.body.velocity.x = 200
-      this.player.scale.setTo(1, 1)
-      this.player.animations.play('climb')
-    }
-    else {
-      this.player.animations.stop()
-      this.player.frame = 6
-    }
-    if (this.cursors.up.isDown && this.player.body.touching.down) {
-      this.player.body.velocity.y = -80
-    }
-  }
-
   checkOverlap (spriteA, spriteB) {
     var boundsA = spriteA.getBounds()
     var boundsB = spriteB.getBounds()
     return Phaser.Rectangle.intersects(boundsA, boundsB)
+  }
+
+  startGame () {
+    this.state.start('Game')
   }
 
   render () {
