@@ -223,7 +223,11 @@ export default class extends Phaser.State {
     //   this.state.start('Over')
     // }
   } // end of update
-
+  render () {
+    // if (__DEV__) {
+    //   this.game.debug.spriteInfo(this.player, 32, 32)
+    // }
+  }
 /// *********** HELPER FUNCTIONS ************** ///
 
   collectFruit (player, cherry) {
@@ -308,11 +312,5 @@ export default class extends Phaser.State {
 
   startGame () {
     this.state.start('Game')
-  }
-
-  render () {
-    // if (__DEV__) {
-    //   this.game.debug.spriteInfo(this.player, 32, 32)
-    // }
   }
 } // end of state object
