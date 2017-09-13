@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "webpack",
     "deploy": "webpack --config webpack.production.config.js",
-    "test": "eslint ./src/**/**.js"
+    "test": "eslint ./src/**/**.js",
+    "start": "http-server"
   },
   "license": "MIT",
   "devDependencies": {
@@ -28,6 +29,7 @@
     "webpack": "^2.5.1"
   },
   "dependencies": {
+    "http-server": "^0.10.0",
     "phaser-ce": "^2.7.9",
     "webfontloader": "^1.6.27"
   }
