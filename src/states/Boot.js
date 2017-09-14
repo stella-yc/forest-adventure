@@ -17,18 +17,12 @@ export default class extends Phaser.State {
 
     let text = this.add.text(this.world.centerX, this.world.centerY, 'Loading...', { font: '20px Cabin Sketch', fill: '#b4de5b', align: 'center' })
     text.anchor.setTo(0.5, 0.5)
-
-    // can load images here
-    // this.load.image('loaderBg', './assets/images/loader-bg.png')
-    // this.load.image('loaderBar', './assets/images/loader-bar.png')
   }
 
   create () {
-    this.game.scale.pageAlignHorizontally = true
-    this.game.scale.pageAlignVertically = true
-    this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
-    this.game.renderer.renderSession.roundPixels = true // no blurring
+    this.scaleGame()
   }
+
   render () {
     this.game.stage.backgroundColor = '#fff'
     if (this.fontsReady) {
@@ -38,5 +32,12 @@ export default class extends Phaser.State {
 
   fontsLoaded () {
     this.fontsReady = true
+  }
+
+  scaleGame () {
+    this.game.scale.pageAlignHorizontally = true
+    this.game.scale.pageAlignVertically = true
+    this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
+    this.game.renderer.renderSession.roundPixels = true // no blurring
   }
 }

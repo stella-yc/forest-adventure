@@ -12,11 +12,16 @@ export const imgTable = {
   'treeTrunk': 'assets/images/treeTrunk.png',
   'black': 'assets/images/black.png',
   'forest': 'assets/images/middle.png',
-  'crate-button': 'assets/images/white-button.png'
+  'crate-button': 'assets/images/white-button.png',
+  'sunnyLand': 'assets/images/tileset.png'
 }
 
 export const spriteTable = {
   'player': ['assets/images/player-full.png', 32, 32],
   'bot': ['assets/images/Old enemies 2 (1).png', 16, 16],
   'blueBot': ['assets/images/blueBot.png', 16, 16]
+}
+
+export const tileTable = {
+  'tileMap': 'assets/tileMap.json'
 }
