@@ -20,10 +20,19 @@ export default class extends Phaser.State {
 
   splashBackground () {
     this.game.stage.backgroundColor = '#fff'
+    this.buildSky()
+    this.buildForest()
+    this.titleText()
+  }
+
+  titleText () {
+    this.game.add.text(70, 40, 'Forest Adventure', { font: '20px Cabin Sketch', fill: '#ffffff', align: 'center' })
+  }
+
+  buildSky () {
     const skyTile = this.game.add.tileSprite(0, 0, 288, 192, 'sky')
     skyTile.fixedToCamera = true
-    this.buildForest()
-    this.titleText = this.game.add.text(70, 40, 'Forest Adventure', { font: '20px Cabin Sketch', fill: '#ffffff', align: 'center' })
+    return skyTile
   }
 
   buildForest () {
