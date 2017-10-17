@@ -15,20 +15,16 @@ export default class extends Phaser.State {
       active: this.fontsLoaded
     })
 
-    let text = this.add.text(this.world.centerX, this.world.centerY, 'Loading...', { font: '16px Cabin Sketch', fill: '#dddddd', align: 'center' })
+    let text = this.add.text(this.world.centerX, this.world.centerY, 'Loading...', { font: '20px Cabin Sketch', fill: '#b4de5b', align: 'center' })
     text.anchor.setTo(0.5, 0.5)
-
-    this.load.image('loaderBg', './assets/images/loader-bg.png')
-    this.load.image('loaderBar', './assets/images/loader-bar.png')
   }
 
   create () {
-    this.game.scale.pageAlignHorizontally = true
-    this.game.scale.pageAlignVertically = true
-    this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
-    this.game.renderer.renderSession.roundPixels = true // no blurring
+    this.scaleGame()
   }
+
   render () {
+    this.game.stage.backgroundColor = '#fff'
     if (this.fontsReady) {
       this.state.start('Splash')
     }
@@ -36,5 +32,12 @@ export default class extends Phaser.State {
 
   fontsLoaded () {
     this.fontsReady = true
+  }
+
+  scaleGame () {
+    this.game.scale.pageAlignHorizontally = true
+    this.game.scale.pageAlignVertically = true
+    this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
+    this.game.renderer.renderSession.roundPixels = true // no blurring
   }
 }
